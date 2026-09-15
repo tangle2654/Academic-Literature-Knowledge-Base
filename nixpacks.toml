@@ -1,0 +1,19 @@
+# Railway / Nixpacks 构建配置
+# 固定 Node 22 LTS（better-sqlite3 只有 Node 22 有预编译包，Node 24 无）
+# 同时安装 Python/g++ 作为原生模块编译 fallback
+
+[providers]
+name = "node"
+
+[phases.setup]
+aptPkgs = ["python3", "make", "g++", "libsqlite3-dev"]
+nixPkgs = ["nodejs_22", "npm"]
+
+[phases.install]
+cmds = ["npm ci --no-audit --no-fund"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"

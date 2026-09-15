@@ -1,7 +1,7 @@
 {
   "name": "academic-knowledge-base",
   "version": "1.0.0",
-  "description": "多用户学术文献知识库 - 支持文献检索订阅、个人知识库、公众号收藏等",
+  "description": "\u591a\u7528\u6237\u5b66\u672f\u6587\u732e\u77e5\u8bc6\u5e93 - \u652f\u6301\u6587\u732e\u68c0\u7d22\u8ba2\u9605\u3001\u4e2a\u4eba\u77e5\u8bc6\u5e93\u3001\u516c\u4f17\u53f7\u6536\u85cf\u7b49",
   "main": "backend/server.js",
   "scripts": {
     "install": "node -e \"const cp=require('child_process');cp.execSync('cd frontend && npm install --no-audit --no-fund',{stdio:'inherit'})\"",
@@ -20,6 +20,7 @@
     "cors": "^2.8.5"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18 <24",
+    "npm": ">=9"
   }
 }
