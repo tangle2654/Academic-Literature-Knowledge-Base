@@ -1,0 +1,39 @@
+# ========= Netlify 部署配置 =========
+# Academic-Literature-Knowledge-Base — 多用户学术文献知识库
+#
+# 默认：纯前端 SPA 模式（无后端，数据存 localStorage，CrossRef 直连）
+#       适合快速部署、立即体验全部 UI 交互
+# 可选：VITE_API_BASE=https://your-api.example.com/api 指向真实后端
+#       此时所有 API 会通过该地址调用，SQLite/JWT/定时推送完整生效
+
+[build]
+  command = "npm run build"
+  publish = "frontend/dist"
+
+# SPA 路由回退：所有非静态资源请求返回 index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# API 代理（可选）：如果后端和前端分开部署，这里可以把 /api 代理到后端
+# Uncomment and set to your backend URL if needed:
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://your-backend.example.com/api/:splat"
+#   status = 200
+
+[build.environment]
+  # Node.js 18+ required for Vite
+  NODE_VERSION = "20"
+
+# 环境变量说明（可在 Netlify UI 的 Site Settings → Environment Variables 中配置）：
+#
+# VITE_API_BASE  — 后端 API 地址（含 /api 前缀）。
+#                  不设置时自动降级为 Mock 模式（全部数据 localStorage）。
+#                  示例：https://kb-api.example.com/api
+#
+# 可选后端部署方案：
+#   - Railway / Render：直接运行 backend/server.js，SQLite + JWT 完整可用
+#   - Netlify Functions：需要把 Express 改写成 Serverless + Turso（见 backend/server.js 改造示例）
+#   - Fly.io / VPS：最完整的生产方案
