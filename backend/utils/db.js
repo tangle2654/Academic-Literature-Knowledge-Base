@@ -1,7 +1,18 @@
 const path = require('path');
+const fs = require('fs');
 const Database = require('better-sqlite3');
 
-const dbPath = path.resolve(__dirname, '../../data/app.db');
+// 支持环境变量配置 DB 路径（Railway / 容器部署指向持久化卷）
+// 优先级：DB_PATH > Railway 自动注入的 RAILWAY_VOLUME_MOUNT_DATA > 本地默认
+const dbPath = process.env.DB_PATH
+  || (process.env.RAILWAY_VOLUME_MOUNT_DATA
+      ? path.join(process.env.RAILWAY_VOLUME_MOUNT_DATA, 'app.db')
+      : path.resolve(__dirname, '../../data/app.db'));
+
+// 确保 DB 所在目录存在（better-sqlite3 不自动创建父目录）
+fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+
+console.log('[db] SQLite path:', dbPath);
 const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');

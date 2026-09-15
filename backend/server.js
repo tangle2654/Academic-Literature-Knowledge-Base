@@ -7,7 +7,13 @@ const { startCron } = require('./cron');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// CORS：生产环境可通过 CORS_ORIGINS 配置允许的来源（逗号分隔）
+// 不设置则开放全部（开发友好；生产建议收紧）
+const corsOrigins = process.env.CORS_ORIGINS;
+const corsOptions = corsOrigins
+  ? { origin: corsOrigins.split(',').map(s => s.trim()), credentials: true }
+  : undefined;
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -24,14 +30,19 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, time: new Date().toISOString() });
 });
 
-// 静态资源
+// 静态资源 + SPA 回退（仅在前端已构建时启用）
 const distPath = path.resolve(__dirname, '../frontend/dist');
-app.use(express.static(distPath));
-
-// SPA 路由回退
-app.get(/^\/(?!api).*/, (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
-});
+const distExists = require('fs').existsSync(distPath);
+if (distExists) {
+  app.use(express.static(distPath));
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+  console.log('[static] serving frontend from', distPath);
+} else {
+  console.warn('[static] frontend/dist not found — SPA disabled, API-only mode');
+  app.get('/', (req, res) => res.json({ ok: true, service: 'academic-kb-api', hint: 'frontend not built' }));
+}
 
 // 全局错误处理
 app.use((err, req, res, next) => {
